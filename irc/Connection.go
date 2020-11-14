@@ -61,7 +61,7 @@ func (connection *Connection) Disconnect() error {
 // Send data to the server connection stream
 func (connection Connection) Send(message string) error {
 	if connection.connected {
-		_, err := fmt.Fprintf(connection.stream, message)
+		_, err := fmt.Fprintf(connection.stream, fmt.Sprintf("%s\n", message))
 		return err
 	}
 
