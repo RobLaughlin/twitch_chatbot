@@ -2,6 +2,7 @@ package irc
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"net"
 	"net/textproto"
@@ -29,13 +30,9 @@ func NewConnection(host string, port uint16) *Connection {
 
 // Connect to a given connection stream
 func (connection *Connection) Connect() (net.Conn, error) {
-	if connection.connected {
-		connection.stream.Close()
-		connection.reader = nil
-	}
+	connection.Disconnect()
 
 	conn, err := net.Dial("tcp", connection.String())
-
 	if err != nil {
 		connection.connected = false
 		connection.stream = nil
@@ -48,6 +45,17 @@ func (connection *Connection) Connect() (net.Conn, error) {
 	connection.connected = true
 
 	return conn, nil
+}
+
+// Disconnect from connection. Returns an error if the connection is not yet connected.
+func (connection *Connection) Disconnect() error {
+	if connection.connected {
+		connection.stream.Close()
+		connection.reader = nil
+		return nil
+	}
+
+	return errors.New("Cannot disconnect, not connected")
 }
 
 // Send data to the server connection stream

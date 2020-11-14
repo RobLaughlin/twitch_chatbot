@@ -21,25 +21,32 @@ func NewClient(username string, password string, connection *Connection) *Client
 // Connect to the set connection
 func (client Client) Connect() error {
 	_, err := client.Connection.Connect()
-	return err
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Disconnect from the set connection
+func (client Client) Disconnect() error {
+	return client.Connection.Disconnect()
+}
+
+// Connected Check if client is connected
+func (client Client) Connected() bool {
+	return client.Connection.Connected()
 }
 
 // Join & authenticate using oauth with the given connection
 func (client Client) Join(oauth bool) error {
-	if !client.Connection.connected {
+	if !client.Connection.Connected() {
 		if err := client.Connect(); err != nil {
 			return err
 		}
 	}
 
 	var userAuth string = fmt.Sprintf("NICK %s\n", client.username)
-	var passAuth string
-
-	if oauth {
-		passAuth = fmt.Sprintf("PASS oauth:%s\n", client.password)
-	} else {
-		passAuth = fmt.Sprintf("PASS %s\n", client.password)
-	}
+	var passAuth string = fmt.Sprintf("PASS %s\n", client.password)
 
 	if err := client.Connection.Send(passAuth); err != nil {
 		return err
