@@ -7,6 +7,7 @@ import (
 	"net/textproto"
 )
 
+// Connection stream to a server
 type Connection struct {
 	host      string
 	port      uint16
@@ -15,6 +16,7 @@ type Connection struct {
 	reader    *textproto.Reader
 }
 
+// NewConnection create a new connection to a server
 func NewConnection(host string, port uint16) *Connection {
 	return &Connection{
 		host:      host,
@@ -25,6 +27,7 @@ func NewConnection(host string, port uint16) *Connection {
 	}
 }
 
+// Connect to a given connection stream
 func (connection *Connection) Connect() (net.Conn, error) {
 	if connection.connected {
 		connection.stream.Close()
@@ -47,6 +50,7 @@ func (connection *Connection) Connect() (net.Conn, error) {
 	return conn, nil
 }
 
+// Send data to the server connection stream
 func (connection Connection) Send(message string) error {
 	if connection.connected {
 		_, err := fmt.Fprintf(connection.stream, message)
@@ -56,14 +60,17 @@ func (connection Connection) Send(message string) error {
 	return fmt.Errorf("cannot send message {%s} on disconnected stream {%s}", message, connection.String())
 }
 
+// ReadLine from the connection stream
 func (connection Connection) ReadLine() (string, error) {
 	return connection.reader.ReadLine()
 }
 
+// Connected - Get the connection status of the stream
 func (connection Connection) Connected() bool {
 	return connection.connected
 }
 
+// String together the host and the port
 func (connection Connection) String() string {
 	return fmt.Sprintf("%s:%d", connection.host, connection.port)
 }

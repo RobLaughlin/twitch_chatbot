@@ -34,7 +34,7 @@ func main() {
 	fmt.Printf("Dialing into %s...\n", connection.String())
 	if !bot.Connection.Connected() {
 		bot.Connect()
-		bot.Join()
+		bot.Join(true)
 	}
 
 	for {
