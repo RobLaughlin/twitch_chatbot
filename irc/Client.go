@@ -1,6 +1,9 @@
 package irc
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // Client IRC client
 type Client struct {
@@ -37,8 +40,8 @@ func (client Client) Connected() bool {
 	return client.Connection.Connected()
 }
 
-// Join & authenticate using oauth with the given connection
-func (client Client) Join(oauth bool) error {
+// Join the connected IRC stream with the given nickname and password
+func (client Client) Join(verbose bool) error {
 	if !client.Connection.Connected() {
 		if err := client.Connect(); err != nil {
 			return err
@@ -47,12 +50,33 @@ func (client Client) Join(oauth bool) error {
 
 	var userAuth string = fmt.Sprintf("NICK %s\n", client.username)
 	var passAuth string = fmt.Sprintf("PASS %s\n", client.password)
+	var asteriskedPass string = strings.Repeat("*", len(client.password))
+
+	if verbose {
+		fmt.Printf("Joining %s with user: %s\n", client.Connection.String(), client.username)
+		fmt.Printf("Sending PASS %s\n", asteriskedPass)
+	}
 
 	if err := client.Connection.Send(passAuth); err != nil {
+		if verbose {
+			fmt.Printf("There was an error sending PASS: %s\n", asteriskedPass)
+		}
 		return err
 	}
+
+	if verbose {
+		fmt.Printf("Sending USER %s\n", client.username)
+	}
+
 	if err := client.Connection.Send(userAuth); err != nil {
+		if verbose {
+			fmt.Printf("There was an error sending USER: %s\n", client.username)
+		}
 		return err
+	}
+
+	if verbose {
+		fmt.Printf("User %s successfully joined: %s!\n", client.username, client.Connection.String())
 	}
 
 	return nil
